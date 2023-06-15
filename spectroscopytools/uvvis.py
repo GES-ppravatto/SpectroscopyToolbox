@@ -1,7 +1,10 @@
 from __future__ import annotations
 from os.path import isfile
-from typing import Tuple, List
+from typing import Tuple, List, Optional, Union
 from datetime import datetime
+
+import matplotlib.pyplot as plt
+
 
 class UVVisSpectrum:
     """
@@ -9,11 +12,13 @@ class UVVisSpectrum:
     measurements. The class provides a standard constructor returning an empty object and a series
     of classmethods designed to parse specific file formats.
     """
+
     def __init__(self) -> None:
+        self.title: str = None
         self.__timestamp: datetime = None
         self.__wavelength: List[float] = []
         self.__absorbance: List[float] = []
-    
+
     @property
     def timestamp(self) -> datetime:
         """
@@ -37,7 +42,7 @@ class UVVisSpectrum:
             The list of float values encoding the wavelength, in nanometers, associated with each datapoint.
         """
         return self.__wavelength
-    
+
     @property
     def absorbance(self) -> List[float]:
         """
@@ -49,6 +54,18 @@ class UVVisSpectrum:
             The list of float values encoding absorbance associated with each datapoint.
         """
         return self.__absorbance
+
+    @property
+    def transmittance(self) -> List[float]:
+        """
+        The transmittance, expressed as a percentage value, associated with each datapoint.
+
+        Returns
+        -------
+        List[float]
+            The list of float values encoding transmittance associated with each datapoint.
+        """
+        return [10 ** (2-A) for A in self.__absorbance]
 
     @classmethod
     def from_JASCO_ASCII(cls, path: str) -> UVVisSpectrum:
@@ -68,33 +85,34 @@ class UVVisSpectrum:
 
         if not isfile(path):
             raise RuntimeError(f"The specified file '{path}' does not exist.")
-        
+
         obj = cls()
 
-        with open(path, 'r') as file:
-
+        with open(path, "r") as file:
             npt, xunits, yunits = None, None, None
 
             for line in file:
+                if "TITLE" in line:
+                    obj.title = line.split("\t")[-1].strip("\n")
 
                 if "XUNITS" in line:
-                    xunits = line.split('\t')[-1].strip("\n")
-                
+                    xunits = line.split("\t")[-1].strip("\n")
+
                 if "YUNITS" in line:
-                    yunits = line.split('\t')[-1].strip("\n")
+                    yunits = line.split("\t")[-1].strip("\n")
 
                 if "DATE" in line:
-                    date_str = line.split('\t')[-1].strip('\n')
+                    date_str = line.split("\t")[-1].strip("\n")
                     date_str += " "
-                    date_str += file.readline().split('\t')[-1].strip('\n')
-                    obj.__timestamp = datetime.strptime(date_str, '%y/%m/%d %H:%M:%S')
+                    date_str += file.readline().split("\t")[-1].strip("\n")
+                    obj.__timestamp = datetime.strptime(date_str, "%y/%m/%d %H:%M:%S")
 
                 if "NPOINTS" in line:
-                    npt = int(line.split('\t')[-1])
+                    npt = int(line.split("\t")[-1])
 
                 if "XYDATA" in line:
                     for _ in range(npt):
-                        data = file.readline().split('\t')
+                        data = file.readline().split("\t")
 
                         xvalue, yvalue = float(data[0]), float(data[1])
 
@@ -102,20 +120,20 @@ class UVVisSpectrum:
                             obj.__wavelength.append(xvalue)
                         else:
                             raise RuntimeError(f"Cannot parse unit {xunits}.")
-                        
+
                         if yunits == "ABSORBANCE":
                             obj.__absorbance.append(yvalue)
                         else:
                             raise RuntimeError(f"Cannot parse unit {yunits}.")
-        
+
         return obj
-    
+
     def __getitem__(self, i: int) -> Tuple[float, float]:
-        if i<0 or i>=len(self):
+        if i < 0 or i >= len(self):
             raise ValueError("Index out of bounds")
 
         return self.__wavelength[i], self.__absorbance[i]
-        
+
     def __iter__(self) -> Tuple[float, float]:
         for w, a in zip(self.__wavelength, self.__absorbance):
             yield w, a
@@ -124,4 +142,64 @@ class UVVisSpectrum:
         return len(self.__wavelength)
     
 
+def plot_spectrum(
+    spectra: Union[List[UVVisSpectrum], UVVisSpectrum],
+    transmittance: bool = False,
+    xrange: Optional[Tuple[float, float]] = None,
+    yrange: Optional[Tuple[float, float]] = None,
+    savepath: Optional[str] = None,
+    show: bool = True,
+):
+    """
+    Function capable of plotting one or more spectra.
 
+    Arguments
+    ---------
+    spectra: Union[List[UVVisSpectrum], UVVisSpectrum]
+        The spectrum or the list of spectra to plot.
+    transmittance: bool
+        If set to True wil switch the y-axis to transmittance mode.
+    xrange: Optional[Tuple[float, float]]
+        The range of values to be shown on the x-axis. The meaning of the values depends on the display mode selected.
+    yrange: Optional[Tuple[float, float]]
+        The range of values to be shown on the y-axis. The meaning of the values depends on the display mode selected.
+    savepath: Optional[str]
+        If set to a value different from None, will specify the path of the file to be saved.
+    show: bool
+        If set to True (default) will show an interactive window where the plot is displayed.
+    """
+    plt.rc("font", **{"family": "serif", "serif": ["Computer Modern Roman"], "size": 18})
+    plt.rc("text", usetex=True)
+
+    fig = plt.figure(figsize=(12, 8))
+
+    spectra: List[UVVisSpectrum] = [spectra] if type(spectra) == UVVisSpectrum else spectra
+
+    for spectrum in spectra:
+        plt.plot(
+            spectrum.wavelength,
+            spectrum.transmittance if transmittance else spectrum.absorbance,
+            label=f"{spectrum.title}",
+        )
+
+    if xrange is not None:
+        plt.xlim(xrange)
+    
+    if yrange is not None:
+        plt.ylim(yrange)
+
+    plt.xlabel("Wavelength [nm]", size=22)
+    plt.ylabel("Transmittance [\%]" if transmittance else "Absorbance [a.u.]", size=22)
+
+    plt.grid(which="major", c="#DDDDDD")
+    plt.grid(which="minor", c="#EEEEEE")
+
+    plt.legend()
+
+    plt.tight_layout()
+
+    if savepath is not None:
+        plt.savefig(savepath, dpi=600)
+
+    if show is True:
+        plt.show()
