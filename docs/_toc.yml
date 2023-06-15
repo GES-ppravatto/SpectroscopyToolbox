@@ -1,0 +1,16 @@
+# Table of contents
+
+format: jb-book
+root: intro
+chapters:
+- file: getting-started
+- file: user-guide
+  sections:
+    - file: Guide/uvvis
+
+- file: api
+  sections:
+    - file: API/uvvis
+    
+- file: contributor-guide
+- file: release-notes

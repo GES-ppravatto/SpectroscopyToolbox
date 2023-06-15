@@ -25,6 +25,7 @@ def test_UVVisSpectrum_from_JASCO_ASCII():
         assert False, "Exception raised on loading JASCO_ASCII"
 
     assert obj.title == "I2_water"
+    assert obj.instrument == "JASCO Corp., V-550, Rev. 1.00"
     assert len(obj) == 21
     assert obj.timestamp == datetime(2023, 6, 14, 15, 14, 38)
 

@@ -15,9 +15,23 @@ class UVVisSpectrum:
 
     def __init__(self) -> None:
         self.title: str = None
+        self.instrument: Optional[str] = None
         self.__timestamp: Optional[datetime] = None
         self.__wavelength: List[float] = []
         self.__absorbance: List[float] = []
+
+    def __str__(self) -> str:
+        msg = f"UV-Visible: {self.title}\n"
+        msg += "-----------------------------------------------------------------\n"
+        msg += f"Date: {self.__timestamp}\n"
+        msg += f"Instrument: {self.instrument}\n"
+        msg += f"Wavelength: {max(self.__wavelength)} - {min(self.__wavelength)} nm\n"
+        msg += f"Max absorbance: {max(self.__absorbance)}\n"
+        msg += f"Min absorbance: {min(self.__absorbance)}\n"
+        return msg
+
+    def __repr__(self) -> str:
+        return str(self)
 
     @property
     def timestamp(self) -> datetime:
@@ -65,7 +79,7 @@ class UVVisSpectrum:
         List[float]
             The list of float values encoding transmittance associated with each datapoint.
         """
-        return [10 ** (2-A) for A in self.__absorbance]
+        return [10 ** (2 - A) for A in self.__absorbance]
 
     @classmethod
     def from_JASCO_ASCII(cls, path: str) -> UVVisSpectrum:
@@ -94,6 +108,9 @@ class UVVisSpectrum:
             for line in file:
                 if "TITLE" in line:
                     obj.title = line.split("\t")[-1].strip("\n")
+                
+                if "SPECTROMETER" in line:
+                    obj.instrument = line.split("\t")[-1].strip("\n")
 
                 if "XUNITS" in line:
                     xunits = line.split("\t")[-1].strip("\n")
@@ -140,36 +157,36 @@ class UVVisSpectrum:
 
     def __len__(self) -> int:
         return len(self.__wavelength)
-    
+
     def __check_binary_operation(self, obj: UVVisSpectrum) -> None:
         if len(self) != len(obj):
             raise RuntimeError("Cannot perform binary operation between spectra of different lengths.")
 
-        if not all([w1==w2 for w1, w2 in zip(self.wavelength, obj.wavelength)]):
+        if not all([w1 == w2 for w1, w2 in zip(self.wavelength, obj.wavelength)]):
             raise RuntimeError("Cannot perform binary operation between spectra with different wavelength ranges")
-    
+
     def __add__(self, obj: UVVisSpectrum) -> UVVisSpectrum:
         self.__check_binary_operation(obj)
-        
+
         result = UVVisSpectrum()
         result.title = self.title + " + " + obj.title
         result.__timestamp = None
         result.__wavelength = self.__wavelength
-        result.__absorbance = [A1+A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
+        result.__absorbance = [A1 + A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
 
         return result
-    
+
     def __sub__(self, obj: UVVisSpectrum) -> UVVisSpectrum:
         self.__check_binary_operation(obj)
-        
+
         result = UVVisSpectrum()
         result.title = self.title + " - " + obj.title
         result.__timestamp = None
         result.__wavelength = self.__wavelength
-        result.__absorbance = [A1-A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
+        result.__absorbance = [A1 - A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
 
         return result
-    
+
     def __mul__(self, obj: UVVisSpectrum) -> UVVisSpectrum:
         self.__check_binary_operation(obj)
 
@@ -177,10 +194,10 @@ class UVVisSpectrum:
         result.title = self.title + " * " + obj.title
         result.__timestamp = None
         result.__wavelength = self.__wavelength
-        result.__absorbance = [A1*A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
+        result.__absorbance = [A1 * A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
 
         return result
-    
+
     def __truediv__(self, obj: UVVisSpectrum) -> UVVisSpectrum:
         self.__check_binary_operation(obj)
 
@@ -188,10 +205,10 @@ class UVVisSpectrum:
         result.title = self.title + " / " + obj.title
         result.__timestamp = None
         result.__wavelength = self.__wavelength
-        result.__absorbance = [A1/A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
-        
+        result.__absorbance = [A1 / A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
+
         return result
-    
+
     def scale(self, value: float, inplace: bool = False) -> Optional[UVVisSpectrum]:
         """
         Scale the absorbance of the spectrum according to a float scalar value.
@@ -212,14 +229,14 @@ class UVVisSpectrum:
 
         if inplace is True:
             self.title = f"{value}*{self.title}"
-            self.__absorbance = [value*A for A in self.__absorbance]
+            self.__absorbance = [value * A for A in self.__absorbance]
 
         else:
             result = UVVisSpectrum()
             result.title = f"{value}*{self.title}"
             result.__timestamp = self.__timestamp
             result.__wavelength = self.__wavelength
-            result.__absorbance = [value*A for A in self.__absorbance]
+            result.__absorbance = [value * A for A in self.__absorbance]
 
             return result
 
@@ -229,6 +246,7 @@ def plot_spectrum(
     transmittance: bool = False,
     xrange: Optional[Tuple[float, float]] = None,
     yrange: Optional[Tuple[float, float]] = None,
+    figsize: Tuple[float, float] = (12., 8.),
     savepath: Optional[str] = None,
     show: bool = True,
 ):
@@ -245,6 +263,8 @@ def plot_spectrum(
         The range of values to be shown on the x-axis. The meaning of the values depends on the display mode selected.
     yrange: Optional[Tuple[float, float]]
         The range of values to be shown on the y-axis. The meaning of the values depends on the display mode selected.
+    figsize: Tuple[float, float]
+        The size of the matplotlib figure to be used in plotting the spectrum. (default: (12, 8))
     savepath: Optional[str]
         If set to a value different from None, will specify the path of the file to be saved.
     show: bool
@@ -253,7 +273,7 @@ def plot_spectrum(
     plt.rc("font", **{"family": "serif", "serif": ["Computer Modern Roman"], "size": 18})
     plt.rc("text", usetex=True)
 
-    fig = plt.figure(figsize=(12, 8))
+    fig = plt.figure(figsize=figsize)
 
     spectra: List[UVVisSpectrum] = [spectra] if type(spectra) == UVVisSpectrum else spectra
 
@@ -266,12 +286,12 @@ def plot_spectrum(
 
     if xrange is not None:
         plt.xlim(xrange)
-    
+
     if yrange is not None:
         plt.ylim(yrange)
 
     plt.xlabel("Wavelength [nm]", size=22)
-    plt.ylabel("Transmittance [\%]" if transmittance else "Absorbance [a.u.]", size=22)
+    plt.ylabel(r"Transmittance [$\%$]" if transmittance else "Absorbance [a.u.]", size=22)
 
     plt.grid(which="major", c="#DDDDDD")
     plt.grid(which="minor", c="#EEEEEE")
