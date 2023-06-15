@@ -270,7 +270,7 @@ def plot_spectrum(
     show: bool
         If set to True (default) will show an interactive window where the plot is displayed.
     """
-    plt.rc("font", **{"family": "serif", "serif": ["Computer Modern Roman"], "size": 18})
+    plt.rc("font", **{"size": 18})
 
     fig = plt.figure(figsize=figsize)
 
