@@ -271,7 +271,6 @@ def plot_spectrum(
         If set to True (default) will show an interactive window where the plot is displayed.
     """
     plt.rc("font", **{"family": "serif", "serif": ["Computer Modern Roman"], "size": 18})
-    plt.rc("text", usetex=True)
 
     fig = plt.figure(figsize=figsize)
 
