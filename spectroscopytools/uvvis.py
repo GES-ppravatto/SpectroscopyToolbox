@@ -15,7 +15,7 @@ class UVVisSpectrum:
 
     def __init__(self) -> None:
         self.title: str = None
-        self.__timestamp: datetime = None
+        self.__timestamp: Optional[datetime] = None
         self.__wavelength: List[float] = []
         self.__absorbance: List[float] = []
 
@@ -141,6 +141,88 @@ class UVVisSpectrum:
     def __len__(self) -> int:
         return len(self.__wavelength)
     
+    def __check_binary_operation(self, obj: UVVisSpectrum) -> None:
+        if len(self) != len(obj):
+            raise RuntimeError("Cannot perform binary operation between spectra of different lengths.")
+
+        if not all([w1==w2 for w1, w2 in zip(self.wavelength, obj.wavelength)]):
+            raise RuntimeError("Cannot perform binary operation between spectra with different wavelength ranges")
+    
+    def __add__(self, obj: UVVisSpectrum) -> UVVisSpectrum:
+        self.__check_binary_operation(obj)
+        
+        result = UVVisSpectrum()
+        result.title = self.title + " + " + obj.title
+        result.__timestamp = None
+        result.__wavelength = self.__wavelength
+        result.__absorbance = [A1+A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
+
+        return result
+    
+    def __sub__(self, obj: UVVisSpectrum) -> UVVisSpectrum:
+        self.__check_binary_operation(obj)
+        
+        result = UVVisSpectrum()
+        result.title = self.title + " - " + obj.title
+        result.__timestamp = None
+        result.__wavelength = self.__wavelength
+        result.__absorbance = [A1-A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
+
+        return result
+    
+    def __mul__(self, obj: UVVisSpectrum) -> UVVisSpectrum:
+        self.__check_binary_operation(obj)
+
+        result = UVVisSpectrum()
+        result.title = self.title + " * " + obj.title
+        result.__timestamp = None
+        result.__wavelength = self.__wavelength
+        result.__absorbance = [A1*A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
+
+        return result
+    
+    def __truediv__(self, obj: UVVisSpectrum) -> UVVisSpectrum:
+        self.__check_binary_operation(obj)
+
+        result = UVVisSpectrum()
+        result.title = self.title + " / " + obj.title
+        result.__timestamp = None
+        result.__wavelength = self.__wavelength
+        result.__absorbance = [A1/A2 for A1, A2 in zip(self.__absorbance, obj.__absorbance)]
+        
+        return result
+    
+    def scale(self, value: float, inplace: bool = False) -> Optional[UVVisSpectrum]:
+        """
+        Scale the absorbance of the spectrum according to a float scalar value.
+
+        Arguments
+        ---------
+        value: float
+            The factor to be used in the multiplication
+        inplace: bool
+            If set to False (default) will return the spectrum scaled by the specified value. Else, it will update the
+            absorbance list of the current spectrum with the updated values.
+
+        Returns
+        -------
+        Optional[UVVisSpectrum]
+            If inplace is set to False (default) will return the scaled spectrum.
+        """
+
+        if inplace is True:
+            self.title = f"{value}*{self.title}"
+            self.__absorbance = [value*A for A in self.__absorbance]
+
+        else:
+            result = UVVisSpectrum()
+            result.title = f"{value}*{self.title}"
+            result.__timestamp = self.__timestamp
+            result.__wavelength = self.__wavelength
+            result.__absorbance = [value*A for A in self.__absorbance]
+
+            return result
+
 
 def plot_spectrum(
     spectra: Union[List[UVVisSpectrum], UVVisSpectrum],

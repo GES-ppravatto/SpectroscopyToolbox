@@ -1,5 +1,6 @@
 from os.path import abspath, dirname
 from datetime import datetime
+from copy import deepcopy
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 
 from spectroscopytools.uvvis import UVVisSpectrum
@@ -92,6 +93,78 @@ def test_UVVisSpectrum___getitem__():
     
     for idx in range(len(obj)):
         assert_almost_equal(expected_results[idx], obj[idx], decimal=4)
+
+
+# Test UVVisSpectrum scale method using a scalar
+def test_UVVisSpectrum_scale():
+
+    obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
+
+    result = obj.scale(1.25)
+
+    assert result.title == "1.25*I2_water"
+    assert_array_almost_equal(result.wavelength, obj.wavelength, decimal=4)
+    assert_array_almost_equal(result.absorbance, [1.25*A for A in obj.absorbance], decimal=4)
+
+
+# Test UVVisSpectrum scale method using a scalar with the implace option
+def test_UVVisSpectrum_scale_with_inplace():
+
+    obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
+
+    original_absorbance = deepcopy(obj.absorbance)
+
+    obj.scale(1.25, inplace=True)
+
+    assert obj.title == "1.25*I2_water"
+    assert_array_almost_equal(obj.absorbance, [1.25*A for A in original_absorbance], decimal=4)
+
+
+# Test UVVisSpectrum __mul__ method using another spectrum object
+def test_UVVisSpectrum___mul__():
+
+    obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
+
+    result = obj * obj
+
+    assert result.title == "I2_water * I2_water"
+    assert_array_almost_equal(result.wavelength, obj.wavelength, decimal=4)
+    assert_array_almost_equal(result.absorbance, [A**2 for A in obj.absorbance], decimal=4)
+
+# Test UVVisSpectrum __div__ method using another spectrum object
+def test_UVVisSpectrum___div__():
+
+    obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
+
+    result = obj / obj
+
+    assert result.title == "I2_water / I2_water"
+    assert_array_almost_equal(result.wavelength, obj.wavelength, decimal=4)
+    assert_array_almost_equal(result.absorbance, [1. for _ in obj.absorbance], decimal=4)
+
+
+# Test UVVisSpectrum __add__ method
+def test_UVVisSpectrum___add__():
+
+    obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
+
+    result = obj + obj
+
+    assert result.title == "I2_water + I2_water"
+    assert_array_almost_equal(result.wavelength, obj.wavelength, decimal=4)
+    assert_array_almost_equal(result.absorbance, [2*A for A in obj.absorbance], decimal=4)
+
+
+# Test UVVisSpectrum __sub__ method
+def test_UVVisSpectrum___sub__():
+
+    obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
+
+    result = obj - obj.scale(0.5)
+
+    assert result.title == "I2_water - 0.5*I2_water"
+    assert_array_almost_equal(result.wavelength, obj.wavelength, decimal=4)
+    assert_array_almost_equal(result.absorbance, [A/2 for A in obj.absorbance], decimal=4)
 
 
 # Test UVVisSpectrum properties 
