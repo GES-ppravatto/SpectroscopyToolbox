@@ -1,6 +1,12 @@
 name: Publish Python distributions to TestPyPI
 
-on: push
+on: 
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
 
 jobs:
   build-n-publish:
