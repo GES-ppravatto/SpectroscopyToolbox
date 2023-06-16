@@ -1,8 +1,12 @@
 from __future__ import annotations
-from os.path import isfile
-from typing import Tuple, List, Optional, Union
-from datetime import datetime
 
+from os.path import isfile
+from typing import Tuple, List, Optional, Union, Callable
+from datetime import datetime
+from warnings import warn
+from scipy.interpolate import make_interp_spline, BSpline
+
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -81,6 +85,26 @@ class UVVisSpectrum:
         """
         return [10 ** (2 - A) for A in self.__absorbance]
 
+    @property
+    def pitch(self) -> float:
+        """
+        The wavelength separation existing between two subsequent data-points.
+
+        Returns
+        -------
+        float
+            The wavelength separation in nanometers existing between to subsequent datapoints. If the points are not
+            equally spaced a warning will be raised and the average pitch value will be returned
+        """
+        delta = [self.wavelength[i] - self.wavelength[i - 1] for i in range(1, len(self))]
+
+        if any([value != delta[0] for value in delta]):
+            warn("The spectral points are not equally spaced. The pitch property will return the average pitch value.")
+            return abs(sum(delta) / len(delta))
+
+        else:
+            return abs(delta[0])
+
     @classmethod
     def from_JASCO_ASCII(cls, path: str) -> UVVisSpectrum:
         """
@@ -108,7 +132,7 @@ class UVVisSpectrum:
             for line in file:
                 if "TITLE" in line:
                     obj.title = line.split("\t")[-1].strip("\n")
-                
+
                 if "SPECTROMETER" in line:
                     obj.instrument = line.split("\t")[-1].strip("\n")
 
@@ -143,6 +167,7 @@ class UVVisSpectrum:
                         else:
                             raise RuntimeError(f"Cannot parse unit {yunits}.")
 
+        obj.__sort()
         return obj
 
     def __getitem__(self, i: int) -> Tuple[float, float]:
@@ -158,9 +183,28 @@ class UVVisSpectrum:
     def __len__(self) -> int:
         return len(self.__wavelength)
 
+    def __sort(self) -> None:
+        """
+        Function sorting the spectal datapoint from the smaller wavelength to the highest.
+        """
+        self.__absorbance = [A for _, A in sorted(zip(self.__wavelength, self.__absorbance), key=lambda pair: pair[0])]
+        self.__wavelength.sort()
+
     def __check_binary_operation(self, obj: UVVisSpectrum) -> None:
+        """
+        The function checks whether a given UVVisSpectrum object can be used in a binary operation involving
+        this UVVisSpectum.
+
+        Raises
+        ------
+        RuntimeError
+            Exception raised if the lenght of the spectrum objects, their pitch or their spectral range is different.
+        """
         if len(self) != len(obj):
             raise RuntimeError("Cannot perform binary operation between spectra of different lengths.")
+
+        if self.pitch != obj.pitch:
+            raise RuntimeError("Cannot perform binary operation between spectra of different pitch.")
 
         if not all([w1 == w2 for w1, w2 in zip(self.wavelength, obj.wavelength)]):
             raise RuntimeError("Cannot perform binary operation between spectra with different wavelength ranges")
@@ -240,13 +284,79 @@ class UVVisSpectrum:
 
             return result
 
+    def interpolate(self, k: int = 3) -> BSpline:
+        """
+        Compute a k-th order interpolating B-spline for the spectrum.
+
+        Arguments
+        ---------
+        k: int
+            The B-spline degree (default: cubic B-spline k=3)
+
+        Returns
+        -------
+        BSpline
+            The interpolating B-spline function as a `scipy.interpolate.BSpline` object.
+        """
+        bspline = make_interp_spline(self.__wavelength, self.__absorbance, k=k)
+        return bspline
+
+    def resample(self, lower: float, upper: float, pitch: float, k: int = 3) -> UVVisSpectrum:
+        """
+        Using a B-spline interpolation, generate a new UVVisSpectum object responding the the user specified requirements.
+
+        Arguments
+        ---------
+        lower: float
+            The minimum value of the wavelength scale in nanometers.
+        upper: float
+            The maximum value of the wavelength scale in nanometers.
+        pitch: float
+            The value of the wavelength sparation, in nanometers, existing between two subsequent datapoints.
+        k: int
+            The B-spline degree used during the resample (default: cubic B-spline k=3)
+
+        Raises
+        ------
+        ValueError
+            Exception raised if the `lower` is bigger or equal to the `upper` value or if `pitch` is invalid.
+        RuntimeError
+            Exception raised if the `lower` and `upper` values specified by the user are outside the original spectum range.
+
+        Returns
+        -------
+        UVVisSpectrum
+            The UVVisSpectrum generated according to the user specified set of parameters.
+        """
+        if lower >= upper:
+            raise ValueError("The lower wavelength value must be lower than the upper one.")
+
+        if pitch <= 0:
+            raise ValueError("The pitch value must be a positive float.")
+
+        if lower < min(self.wavelength) or upper > max(self.wavelength):
+            raise RuntimeError("Cannot perform interpolation. The required range exceed the range of available data.")
+
+        spectrum = UVVisSpectrum()
+        spectrum.title = self.title + " (resampled)"
+        spectrum.instrument = f"B-spline (k={k}) interpolation <- original: {self.instrument}"
+        spectrum.__timestamp = self.__timestamp
+
+        spectrum.__wavelength = np.arange(start=lower, stop=upper + pitch, step=pitch)
+
+        bspline = self.interpolate(k=k)
+        spectrum.__absorbance = bspline(spectrum.__wavelength)
+        spectrum.__sort()
+
+        return spectrum
+
 
 def plot_spectrum(
     spectra: Union[List[UVVisSpectrum], UVVisSpectrum],
     transmittance: bool = False,
     xrange: Optional[Tuple[float, float]] = None,
     yrange: Optional[Tuple[float, float]] = None,
-    figsize: Tuple[float, float] = (12., 8.),
+    figsize: Tuple[float, float] = (12.0, 8.0),
     savepath: Optional[str] = None,
     show: bool = True,
 ):
