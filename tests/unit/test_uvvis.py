@@ -139,6 +139,16 @@ def test_UVVisSpectrum___sub__():
     assert_array_almost_equal(result.absorbance, [A / 2 for A in obj.absorbance], decimal=4)
 
 
+# Test the UVVisSpectrum subspectrum method
+def test_UVVisSpectrum_subspectrum():
+    obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
+
+    new_obj = obj.subspectrum(400, 500)
+
+    assert max(new_obj.wavelength) == 500
+    assert min(new_obj.wavelength) == 400
+
+
 # Test the UVVisSpectrum interpolate method
 def test_UVVisSpectrum_interpolate():
     obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")

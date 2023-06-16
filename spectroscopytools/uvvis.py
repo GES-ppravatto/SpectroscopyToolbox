@@ -284,6 +284,43 @@ class UVVisSpectrum:
 
             return result
 
+    def subspectrum(self, lower: float, upper: float) -> UVVisSpectrum:
+        """
+        Generate from the spectrum a new UVVisSpectrum object containing only the datapoints between the user specified
+        lower and upper limits.
+
+        Arguments
+        ---------
+        lower: float
+            The lower limit of the new spectrum (included if available)
+        upper: float
+            The upper limit of the new spectrum (included if available)
+
+        Raises
+        ------
+        ValueError
+            Exception raised if the lower limit is not smaller than the upper one.
+
+        Returns
+        -------
+        UVVisSpectrum
+            The spectrum object containing the experimental point withing the user specified wavelength bounaries.
+        """
+        if lower >= upper:
+            raise ValueError("The lower limit must be smaller than the upper one.")
+
+        subspectrum = UVVisSpectrum()
+        subspectrum.title = self.title
+        subspectrum.instrument = self.instrument
+        subspectrum.__timestamp = self.__timestamp
+
+        for wavelength, absorbance in self:
+            if wavelength >= lower and wavelength <= upper:
+                subspectrum.__wavelength.append(wavelength)
+                subspectrum.__absorbance.append(absorbance)
+
+        return subspectrum
+
     def interpolate(self, k: int = 3) -> BSpline:
         """
         Compute a k-th order interpolating B-spline for the spectrum.
