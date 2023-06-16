@@ -140,6 +140,139 @@ Min absorbance: 0.00953
 <img alt="../_images/0f806995e22dfe77206f22cbc57b424099f3a74619e87329df796e9e7d53b1e2.png" src="../_images/0f806995e22dfe77206f22cbc57b424099f3a74619e87329df796e9e7d53b1e2.png" />
 </div>
 </div>
+<section id="performing-operations-between-spectra">
+<h2>Performing operations between spectra<a class="headerlink" href="#performing-operations-between-spectra" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">UVVisSpectrum</span></code> class also supports mathematical operations such as the scaling of the spectrum according to a scalar <code class="docutils literal notranslate"><span class="pre">float</span></code> value (<code class="docutils literal notranslate"><span class="pre">scale</span></code>) or the application of binary operations, such as sum (<code class="docutils literal notranslate"><span class="pre">+</span></code>), subtraction (<code class="docutils literal notranslate"><span class="pre">-</span></code>), multiplication (<code class="docutils literal notranslate"><span class="pre">*</span></code>) or division (<code class="docutils literal notranslate"><span class="pre">/</span></code>), between two different <code class="docutils literal notranslate"><span class="pre">UVVisSpectrum</span></code> spectra objects.</p>
+<div class="warning admonition">
+<p class="admonition-title">Note</p>
+<p>To perfrom binary operations (<code class="docutils literal notranslate"><span class="pre">+</span></code>, <code class="docutils literal notranslate"><span class="pre">-</span></code>, <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">/</span></code>) between two distinct <code class="docutils literal notranslate"><span class="pre">UVVisSpectrum</span></code> objects, the two objects must be recorded on the same wavelengths scale. If this is not the case the spectra must be either cut <a class="reference internal" href="#uvvis-subspectrum"><span class="std std-ref">using the <code class="docutils literal notranslate"><span class="pre">subspectrum()</span></code> method</span></a> or resampled by interpolation <a class="reference internal" href="#uvvis-resample"><span class="std std-ref">using the <code class="docutils literal notranslate"><span class="pre">resample()</span></code> method</span></a>.</p>
+</div>
+<p>The scaling operation can be invoked using the <code class="docutils literal notranslate"><span class="pre">scale</span></code> method according to the command:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scaled</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">plot_spectrum</span><span class="p">([</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">scaled</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">xrange</span><span class="o">=</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">700</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/88e662bfccf52a65f356ac52140ec5e28f580231f563b50d3c538162b615b366.png" src="../_images/88e662bfccf52a65f356ac52140ec5e28f580231f563b50d3c538162b615b366.png" />
+</div>
+</div>
+<p>Operations between different spectra can be performed by simply using the algebraic symbols (<code class="docutils literal notranslate"><span class="pre">+</span></code>, <code class="docutils literal notranslate"><span class="pre">-</span></code>, <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">/</span></code>). As an example, the following code will compute the ratio between two spectra:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sp1</span> <span class="o">=</span> <span class="n">UVVisSpectrum</span><span class="o">.</span><span class="n">from_JASCO_ASCII</span><span class="p">(</span><span class="s2">&quot;../utils/example_1.txt&quot;</span><span class="p">)</span>
+<span class="n">sp2</span> <span class="o">=</span> <span class="n">UVVisSpectrum</span><span class="o">.</span><span class="n">from_JASCO_ASCII</span><span class="p">(</span><span class="s2">&quot;../utils/example_2.txt&quot;</span><span class="p">)</span>
+
+<span class="n">sp_diff</span> <span class="o">=</span> <span class="n">sp1</span> <span class="o">/</span> <span class="n">sp2</span>
+
+<span class="n">plot_spectrum</span><span class="p">([</span><span class="n">sp1</span><span class="p">,</span> <span class="n">sp2</span><span class="p">,</span> <span class="n">sp_diff</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">xrange</span><span class="o">=</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">700</span><span class="p">),</span> <span class="n">yrange</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b178da803eb3fd0961f0b94e4b48c90e2dd453817db21a0bec268477fa3e3ec5.png" src="../_images/b178da803eb3fd0961f0b94e4b48c90e2dd453817db21a0bec268477fa3e3ec5.png" />
+</div>
+</div>
+<p>Please notice how, in both case, the title of the spectrum is automatically updated to keep track of the operation performed. The timestamp is kept unchanged in the case of a simple scaling operation while is set to <code class="docutils literal notranslate"><span class="pre">None</span></code> if a binary operation is considered.</p>
+</section>
+<section id="extracting-a-sub-spectrum-from-a-spectrum">
+<span id="uvvis-subspectrum"></span><h2>Extracting a sub-spectrum from a spectrum<a class="headerlink" href="#extracting-a-sub-spectrum-from-a-spectrum" title="Permalink to this heading"></a></h2>
+<p>Starting from an initialized <code class="docutils literal notranslate"><span class="pre">UVVisSpectrum</span></code> object, a smaller portion of the spectrum, covering only a smaller part of the spectral region can be extracted using the <code class="docutils literal notranslate"><span class="pre">subspectrum</span></code> method. The method can be invoked by simply specifying the range of the new spectrum according to the command:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">subspectrum</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">subspectrum</span><span class="p">(</span><span class="mi">350</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original spectrum:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New spectrum:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">subspectrum</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original spectrum:
+UV-Visible: I2_water
+-----------------------------------------------------------------
+Date: 2023-06-14 15:14:38
+Instrument: JASCO Corp., V-550, Rev. 1.00
+Wavelength: 700.0 - 300.0 nm
+Max absorbance: 0.21184
+Min absorbance: 0.00953
+
+New spectrum:
+UV-Visible: I2_water
+-----------------------------------------------------------------
+Date: 2023-06-14 15:14:38
+Instrument: JASCO Corp., V-550, Rev. 1.00
+Wavelength: 600.0 - 350.0 nm
+Max absorbance: 0.21184
+Min absorbance: 0.02068
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="interpolating-a-spectrum">
+<span id="uvvis-interpolate"></span><h2>Interpolating a spectrum<a class="headerlink" href="#interpolating-a-spectrum" title="Permalink to this heading"></a></h2>
+<p>An <code class="docutils literal notranslate"><span class="pre">UVVisSpectrum</span></code> object can be interpolated using a <code class="docutils literal notranslate"><span class="pre">k</span></code>-th order B-spline. The operation will return a <code class="docutils literal notranslate"><span class="pre">scipy.interpolate.BSpline</span></code> object that can than be called to predict absorbance values in a continuous range of values going from the lower to the upper extremes of the wavelength scale of the original object.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bspline</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">interpolate</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The extimated value of absorbance at 513.4nm is </span><span class="si">{</span><span class="n">bspline</span><span class="p">(</span><span class="mf">513.4</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The extimated value of absorbance at 513.4nm is 0.1170
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="resample-a-spectrum">
+<span id="uvvis-resample"></span><h2>Resample a spectrum<a class="headerlink" href="#resample-a-spectrum" title="Permalink to this heading"></a></h2>
+<p>Using the interpolation function, a <code class="docutils literal notranslate"><span class="pre">UVVisSpectrum</span></code> object can be resampled and possibly downsized to match a particular user requirement. A possible application is the use of binary operations: A spectrum recorded with a higher sample rate (smaller pitch) can be “downsampled” to allow operations with other lower resolution spectra. Another application is to approximate the shape of a spectrum starting from a lower resolution one. The resampling operation is conveniently implemented in the <code class="docutils literal notranslate"><span class="pre">resample</span></code> function.</p>
+<p>As an example let us show how a low resolution spectra can be resampled using a cubic B-spline:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">old</span> <span class="o">=</span> <span class="n">UVVisSpectrum</span><span class="o">.</span><span class="n">from_JASCO_ASCII</span><span class="p">(</span><span class="s2">&quot;../utils/iodine_lres.txt&quot;</span><span class="p">)</span>
+<span class="n">new</span> <span class="o">=</span> <span class="n">old</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="mi">350</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">pitch</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+
+<span class="c1"># The following lines are only responsible to plot the results</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">old</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">old</span><span class="o">.</span><span class="n">absorbance</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">new</span><span class="o">.</span><span class="n">absorbance</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s2">&quot;font&quot;</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">18</span><span class="p">})</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Wavelength [nm]&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Absorbance [a.u.]&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;#DDDDDD&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s2">&quot;minor&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;#EEEEEE&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>UV-Visible: I2_water (resampled)
+-----------------------------------------------------------------
+Date: 2023-06-14 15:14:38
+Instrument: B-spline (k=3) interpolation &lt;- original: JASCO Corp., V-550, Rev. 1.00
+Wavelength: 600 - 350 nm
+Max absorbance: 0.21191024427059665
+Min absorbance: 0.02068
+</pre></div>
+</div>
+<img alt="../_images/2f5cd6f719c9995ec776ade891c30fcf36d016f5cfd3921fc531a907c825b040.png" src="../_images/2f5cd6f719c9995ec776ade891c30fcf36d016f5cfd3921fc531a907c825b040.png" />
+</div>
+</div>
+</section>
 </section>
 
     <script type="text/x-thebe-config">

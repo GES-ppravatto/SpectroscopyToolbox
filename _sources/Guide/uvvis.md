@@ -34,3 +34,80 @@ from spectroscopytools.uvvis import plot_spectrum
 
 plot_spectrum(spectrum, figsize=(10, 6), xrange=(300, 700))
 ```
+
+## Performing operations between spectra
+The `UVVisSpectrum` class also supports mathematical operations such as the scaling of the spectrum according to a scalar `float` value (`scale`) or the application of binary operations, such as sum (`+`), subtraction (`-`), multiplication (`*`) or division (`/`), between two different `UVVisSpectrum` spectra objects.
+
+:::{admonition} Note
+:class: warning
+To perfrom binary operations (`+`, `-`, `*`, `/`) between two distinct `UVVisSpectrum` objects, the two objects must be recorded on the same wavelengths scale. If this is not the case the spectra must be either cut [using the `subspectrum()` method](UVVIS-subspectrum) or resampled by interpolation [using the `resample()` method](UVVIS-resample).
+:::
+
+The scaling operation can be invoked using the `scale` method according to the command:
+
+```{code-cell} python
+scaled = spectrum.scale(0.5)
+
+plot_spectrum([spectrum, scaled], figsize=(10, 6), xrange=(300, 700))
+```
+
+Operations between different spectra can be performed by simply using the algebraic symbols (`+`, `-`, `*`, `/`). As an example, the following code will compute the ratio between two spectra:
+
+```{code-cell} python
+sp1 = UVVisSpectrum.from_JASCO_ASCII("../utils/example_1.txt")
+sp2 = UVVisSpectrum.from_JASCO_ASCII("../utils/example_2.txt")
+
+sp_diff = sp1 / sp2
+
+plot_spectrum([sp1, sp2, sp_diff], figsize=(10, 6), xrange=(300, 700), yrange=(0, 1.2))
+```
+Please notice how, in both case, the title of the spectrum is automatically updated to keep track of the operation performed. The timestamp is kept unchanged in the case of a simple scaling operation while is set to `None` if a binary operation is considered.
+
+(UVVIS-subspectrum)=
+## Extracting a sub-spectrum from a spectrum
+Starting from an initialized `UVVisSpectrum` object, a smaller portion of the spectrum, covering only a smaller part of the spectral region can be extracted using the `subspectrum` method. The method can be invoked by simply specifying the range of the new spectrum according to the command:
+
+```{code-cell} python
+subspectrum = spectrum.subspectrum(350, 600)
+
+print("Original spectrum:")
+print(spectrum)
+
+print("New spectrum:")
+print(subspectrum)
+```
+
+(UVVIS-interpolate)=
+## Interpolating a spectrum
+An `UVVisSpectrum` object can be interpolated using a `k`-th order B-spline. The operation will return a `scipy.interpolate.BSpline` object that can than be called to predict absorbance values in a continuous range of values going from the lower to the upper extremes of the wavelength scale of the original object.
+
+```{code-cell} python
+bspline = spectrum.interpolate()
+
+print(f"The extimated value of absorbance at 513.4nm is {bspline(513.4):.4f}")
+```
+
+(UVVIS-resample)=
+## Resample a spectrum
+Using the interpolation function, a `UVVisSpectrum` object can be resampled and possibly downsized to match a particular user requirement. A possible application is the use of binary operations: A spectrum recorded with a higher sample rate (smaller pitch) can be "downsampled" to allow operations with other lower resolution spectra. Another application is to approximate the shape of a spectrum starting from a lower resolution one. The resampling operation is conveniently implemented in the `resample` function.
+
+As an example let us show how a low resolution spectra can be resampled using a cubic B-spline:
+
+```{code-cell} python
+old = UVVisSpectrum.from_JASCO_ASCII("../utils/iodine_lres.txt")
+new = old.resample(lower=350, upper=600, pitch=1)
+
+print(new)
+
+# The following lines are only responsible to plot the results
+import matplotlib.pyplot as plt
+fig = plt.figure(figsize=(10, 6))
+plt.scatter(old.wavelength, old.absorbance, c="black", marker="+", s=100, zorder=3)
+plt.plot(new.wavelength, new.absorbance, c="red")
+plt.rc("font", **{"size": 18})
+plt.xlabel("Wavelength [nm]", size=22)
+plt.ylabel("Absorbance [a.u.]", size=22)
+plt.grid(which="major", c="#DDDDDD")
+plt.grid(which="minor", c="#EEEEEE")
+plt.show()
+```
