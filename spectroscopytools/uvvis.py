@@ -5,9 +5,32 @@ from typing import Tuple, List, Optional, Union, Callable
 from datetime import datetime
 from warnings import warn
 from scipy.interpolate import make_interp_spline, BSpline
+from scipy.optimize import curve_fit
 
 import numpy as np
 import matplotlib.pyplot as plt
+
+
+def unitary_gaussian(x: float, x0: float, fwhm: float) -> float:
+    """
+    Unitary height Gaussian function.
+
+    Arguments
+    ---------
+    x: float
+        The float value encoding the current value of the coordinate.
+    x0: float
+        The float value encoding the position of the center of the Gaussian function.
+    fwhm: float
+        The float value indicating the full width at half maximum setting the amplitude of the Gaussian function.
+
+    Returns
+    -------
+    float
+        The value of the Gaussian function at the point `x`.
+    """
+    sigma = fwhm / (2 * np.sqrt(2 * np.log(2)))
+    return np.exp(-0.5 * ((x - x0) / sigma) ** 2)
 
 
 class UVVisSpectrum:
@@ -451,3 +474,297 @@ def plot_spectrum(
 
     if show is True:
         plt.show()
+
+
+class FittingEngine:
+    """
+    Simple class capable of performing Gaussian fitting of UVVisSpectrum objects. The class allows the user to fit the
+    spectrum using a linear combination of Gaussians superimposed to a user defined polynomial baseline.
+
+    Arguments
+    ---------
+    spectrum: UVVisSpectrum
+        The spectrum to be fitted
+    """
+
+    def __init__(self, spectrum: UVVisSpectrum) -> None:
+        self.__ngaussians: int = 0
+        self.__baseline_degree: int = None
+        self.__spectrum: UVVisSpectrum = spectrum
+        self.__popt: List[float] = []
+        self.__pcov: List[List[float]] = []
+        self.__infodict: dict = None,
+        self.__mesg: str = None,
+        self.__ier: int = None
+
+    def __str__(self) -> str:
+        msg = ""
+
+        if self.__mesg != "":
+            msg += "============================================================================\n"
+            msg += "                            FITTING REPORT\n"
+            msg += "============================================================================\n"
+            msg += "Output message: " + self.__mesg + "\n\n"  
+        
+        if self.__baseline_degree is not None:           
+            msg += "Polynomial baseline:\n"
+            msg += "  -----------------------\n"
+            msg += "  | order | coefficient |\n"
+            msg += "  -----------------------\n"
+            for n in range(self.__baseline_degree + 1):
+                p_n = self.optimized_parameters[n]
+                msg += "  | {0:<5} | {1:^11} |\n".format(f"{n:d}", f"{p_n:.4e}")
+            msg += "  -----------------------\n"
+            msg += "\n"
+
+        msg += "Gaussian functions:\n"
+        msg += "  ---------------------------------------------------\n"
+        msg += "  | index | coefficient | center (nm) |  FWHM (nm)  |\n"
+        msg += "  ---------------------------------------------------\n"
+
+        offset = self.__baseline_degree + 1 if self.__baseline_degree is not None else 0
+        for n in range(self.__ngaussians):
+            c_n = self.optimized_parameters[3 * n + offset]
+            x0_n = self.optimized_parameters[3 * n + offset + 1]
+            fwhm_n = self.optimized_parameters[3 * n + offset + 2]
+            msg += "  | {0:<5} | {1:^11} | {2:^11} | {3:^11} |\n".format(
+                f"{n:d}", f"{c_n:.4e}", f"{x0_n:.2f}", f"{fwhm_n:.4e}"
+            )
+        msg += "  ---------------------------------------------------\n"
+
+        return msg
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    @property
+    def optimized_parameters(self) -> List[float]:
+        """
+        The list of optimized parameters minimizing the squared residuals of the composite function difference to the
+        provided spectroscopic data.
+
+        Returns
+        -------
+        List[float]
+            The list of optimized parameters.
+        """
+        if len(self.__popt) == 0:
+            raise RuntimeError(
+                "Cannot obtain the optimized parameters. The fit function has failed or it has not been called."
+            )
+        return self.__popt
+
+    @property
+    def estimated_covariance(self) -> List[List[float]]:
+        """
+        The estimated covariance of the optimized_parameters. The diagonals provide the variance of the parameter estimate.
+
+        Returns
+        -------
+        List[List[float]]
+            The covariance matrix of the optimized_parameters.
+        """
+        if len(self.__pcov) == 0:
+            raise RuntimeError(
+                "Cannot obtain the etimated covariance. The fit function has failed or it has not been called."
+            )
+        return self.__pcov
+
+    def combined_function(self, x: float, *p: Tuple[float]) -> float:
+        """
+        Combined fitting function incorporating the combination of a polynomial baseline with a linear combination of
+        Gaussian functions.
+
+        Arguments
+        ---------
+        x: float
+            The float value associated to the coordinata at which the function must be computed.
+        *p: Tuple[float]
+            The tuple encoding the float parameters setting the baseline and gaussian shapes. The ordering of the
+            parameters is the following: the first `n+1` parameters, where `n` represents the degree of the baseline
+            polynomials, sets the coefficients of the various powers of the coordinate. The others represents the
+            parameters associated to the gaussians. These are ordered in triplets of: coefficient, center and FWHM.
+
+        Returns
+        -------
+        float
+            The value of combined function at the slected coordinate value.
+        """
+        sum = 0
+        if self.__baseline_degree is not None:
+            for n in range(self.__baseline_degree + 1):
+                sum += p[n] * (x**n)
+
+        offset = self.__baseline_degree + 1 if self.__baseline_degree is not None else 0
+
+        for n in range(self.__ngaussians):
+            sum += p[3 * n + offset] * unitary_gaussian(x, p[3 * n + 1 + offset], p[3 * n + 2 + offset])
+
+        return sum
+
+    def fit(
+        self,
+        ngaussians: int,
+        baseline_degree: Optional[int] = None,
+        max_feval: int = 10000000,
+        x0_bound: float = 100,
+        verbose: bool = True,
+    ) -> None:
+        """
+        Function running the fitting process.
+
+        Arguments
+        ---------
+        ngaussians: int
+            The number of gaussian functions to be used in the optimization.
+        baseline: Optional[int]
+            The degree of the baseline polynomial.
+        max_feval: int
+            The maximum number of function evaluations allowed during the optimization (default: 1e7).
+        x0_bound: float
+            The maximum extension below the minimum and above the maximum of the center of a gaussian function used in
+            fitting.
+        verbose: bool
+            If verbose is set to True (default), A report will be printed at the end of the fitting process.
+
+        Raises
+        ------
+        ValueError
+            Exception raised if the number of gaussians is less than one or if an invalid value is given to the baseline
+            degree.
+        """
+        if ngaussians <= 0:
+            raise ValueError("The number of gaussian used in the fitting cannot be smaller than 1.")
+
+        if baseline_degree is not None:
+            if baseline_degree < 0:
+                raise ValueError("The baseline degree must be a non-negative integer.")
+
+        self.__ngaussians = ngaussians
+        self.__baseline_degree = baseline_degree
+
+        wlmin = min(self.__spectrum.wavelength)
+        wlmax = max(self.__spectrum.wavelength)
+
+        bounds = ([], [])
+        guess = []
+        if baseline_degree is not None:
+            for n in range(baseline_degree + 1):
+                bounds[0].append(0)
+                bounds[1].append(np.inf)
+                guess.append(0)
+
+        wldelta = (wlmax - wlmin) / self.__ngaussians
+        for n in range(ngaussians):
+            guess.append(max(self.__spectrum.absorbance) / 2)
+            bounds[0].append(0)
+            bounds[1].append(np.inf)
+
+            guess.append(0.5 * wldelta + n * wldelta + wlmin)
+            bounds[0].append(wlmin - x0_bound)
+            bounds[1].append(wlmax + x0_bound)
+
+            guess.append(20)
+            bounds[0].append(0)
+            bounds[1].append(np.inf)
+
+        self.__popt, self.__pcov, self.__infodict, self.__mesg, self.__ier = curve_fit(
+            self.combined_function,
+            self.__spectrum.wavelength,
+            self.__spectrum.absorbance,
+            p0=guess,
+            maxfev=max_feval,
+            bounds=bounds,
+            full_output=True,
+        )
+
+        if verbose:
+            print(self)
+
+    def plot(
+        self,
+        figsize: Tuple[float, float] = (16.0, 10.0),
+        savepath: Optional[str] = None,
+        show: bool = True,
+    ) -> None:
+        """
+        Function to plot the results of the fitting operation.
+
+        Arguments
+        ---------
+        figsize: Tuple[float, float]
+            The size of the matplotlib figure to be used in plotting the spectrum. (default: (16, 10))
+        savepath: Optional[str]
+            If set to a value different from None, will specify the path of the file to be saved.
+        show: bool
+            If set to True (default) will show an interactive window where the plot is displayed.
+
+        Raises
+        ------
+        RuntimeError
+            Exception raised if the `fit` function has not been called before.
+        """
+        if len(self.__popt) == 0:
+            raise RuntimeError("Cannot plot the results, the optimized parameters list is empty.")
+
+        plt.rc("font", **{"size": 18})
+
+        fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=figsize, gridspec_kw={"height_ratios": [4, 1]})
+
+        p = self.__popt
+        wl = self.__spectrum.wavelength
+
+        ax1.plot(wl, self.__spectrum.absorbance, c="red", linewidth=1.5)
+
+        if self.__baseline_degree is not None:
+            baseline = []
+            for x in wl:
+                sum = 0
+                for n in range(self.__baseline_degree + 1):
+                    sum += p[n] * (x**n)
+                baseline.append(sum)
+
+            ax1.plot(wl, baseline, c="#888888", linewidth=0.5)
+            ax1.fill_between(wl, [0 for _ in wl], baseline, alpha=0.5, label="baseline")
+
+        offset = self.__baseline_degree + 1 if self.__baseline_degree is not None else 0
+        for n in range(self.__ngaussians):
+            gaussian = []
+            for x in wl:
+                y = p[3 * n + offset] * unitary_gaussian(x, p[3 * n + 1 + offset], p[3 * n + 2 + offset])
+                gaussian.append(y)
+
+            ax1.plot(wl, gaussian, c="#888888", linewidth=0.5)
+            ax1.fill_between(wl, [0 for _ in wl], gaussian, alpha=0.5, label=str(n))
+
+        fit = [self.combined_function(x, *p) for x in wl]
+        error = [100 * (x - y) / x for x, y in zip(self.__spectrum.absorbance, fit)]
+
+        ax1.plot(
+            wl,
+            fit,
+            c="black",
+            linestyle="--",
+            linewidth=1.5,
+            label="fit",
+        )
+
+        ax2.plot(wl, error, c="red", linewidth=1.5)
+
+        ax1.set_xlim((min(wl), max(wl)))
+        ax2.set_xlim((min(wl), max(wl)))
+
+        ax2.set_xlabel("Wavelength [nm]", size=22)
+
+        ax1.set_ylabel("Absorbance [a.u.]", size=22)
+        ax2.set_ylabel("Error [%]", size=22)
+
+        ax1.legend()
+
+        plt.tight_layout()
+
+        if savepath is not None:
+            plt.savefig(savepath, dpi=600)
+
+        if show is True:
+            plt.show()
