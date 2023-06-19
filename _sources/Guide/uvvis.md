@@ -111,3 +111,27 @@ plt.grid(which="major", c="#DDDDDD")
 plt.grid(which="minor", c="#EEEEEE")
 plt.show()
 ```
+
+# Perfrming a Gaussian fitting
+
+Once a `UVVisSpectrum` object has been created, a Gaussian-based fitting can be performed using the `spectroscopytools.uvvis.FittingEngine`. The fitting routine optimizes a linear combination of gaussian functions combined with a polynobial baseline of different order. The general equation of the composite function $f(x)$ is the following:
+
+$$
+  f(x) := \sum_{k=0}^{N_b} c^{(b)}_k x^k + \sum_{k=0}^{N_g} c^{(g)}_k e^{-\frac{(x-x_k)^2}{2\sigma^2}} \qquad \text{with} \qquad \sigma = \frac{w_\mathrm{FWHM}}{2\sqrt{2 \log(2)}}
+$$
+
+where $N_b$ and $N_g$ are set freely by the user. The optimized parameters are the expansion coefficients $c^{(b)}_k$ and $c^{(b)}_k$, the position $x_k$ of each gaussian and its amplitude at half the maximum $w_\mathrm{FWHM}$. A constrained minimization is performed using the `scipy.optimize.curve_fit` function setting the following limits:
+
+* The coefficients $c^{(b)}_k$, $c^{(b)}_k$ and the full width at half maximum $w_\mathrm{FWHM}$ are limited to positive values.
+* The center of each gaussian is limited to fall within a finite maximum excursion from the wavelength range included in the spectrum. This can be set by the user (by default $100\mathrm{nm}$ from each end of the spectrum is adopted).
+
+To perform a gaussian fitting using 13 Gaussian function and a zero-order baseline (constant shift), the following code can be used:
+
+```{code-cell} python
+from spectroscopytools.uvvis import UVVisSpectrum, FittingEngine
+
+spectrum = UVVisSpectrum.from_JASCO_ASCII("../utils/fit_example.txt")
+engine = FittingEngine(spectrum)
+engine.fit(13, 0)
+engine.plot()
+```

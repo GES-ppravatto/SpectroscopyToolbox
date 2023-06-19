@@ -101,6 +101,118 @@ const thebe_selector_output = ".output, .cell_output"
   <section class="tex2jax_ignore mathjax_ignore" id="module-spectroscopytools.uvvis">
 <span id="spectroscopytools-uvvis-module"></span><span id="api-uvvis"></span><h1><code class="docutils literal notranslate"><span class="pre">spectroscopytools.uvvis</span></code> module<a class="headerlink" href="#module-spectroscopytools.uvvis" title="Permalink to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.FittingEngine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spectroscopytools.uvvis.</span></span><span class="sig-name descname"><span class="pre">FittingEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.FittingEngine" title="Permalink to this definition"></a></dt>
+<dd><p>Simple class capable of performing Gaussian fitting of UVVisSpectrum objects. The class allows the user to fit the
+spectrum using a linear combination of Gaussians superimposed to a user defined polynomial baseline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>spectrum</strong> (<a class="reference internal" href="#spectroscopytools.uvvis.UVVisSpectrum" title="spectroscopytools.uvvis.UVVisSpectrum"><em>UVVisSpectrum</em></a>) – The spectrum to be fitted</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.FittingEngine.combined_function">
+<span class="sig-name descname"><span class="pre">combined_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.FittingEngine.combined_function" title="Permalink to this definition"></a></dt>
+<dd><p>Combined fitting function incorporating the combination of a polynomial baseline with a linear combination of
+Gaussian functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – The float value associated to the coordinata at which the function must be computed.</p></li>
+<li><p><strong>*p</strong> (<em>Tuple</em><em>[</em><em>float</em><em>]</em>) – The tuple encoding the float parameters setting the baseline and gaussian shapes. The ordering of the
+parameters is the following: the first <cite>n+1</cite> parameters, where <cite>n</cite> represents the degree of the baseline
+polynomials, sets the coefficients of the various powers of the coordinate. The others represents the
+parameters associated to the gaussians. These are ordered in triplets of: coefficient, center and FWHM.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value of combined function at the slected coordinate value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.FittingEngine.estimated_covariance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">estimated_covariance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#spectroscopytools.uvvis.FittingEngine.estimated_covariance" title="Permalink to this definition"></a></dt>
+<dd><p>The estimated covariance of the optimized_parameters. The diagonals provide the variance of the parameter estimate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The covariance matrix of the optimized_parameters.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[List[float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.FittingEngine.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ngaussians</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline_degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_feval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.FittingEngine.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Function running the fitting process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ngaussians</strong> (<em>int</em>) – The number of gaussian functions to be used in the optimization.</p></li>
+<li><p><strong>baseline</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – The degree of the baseline polynomial.</p></li>
+<li><p><strong>max_feval</strong> (<em>int</em>) – The maximum number of function evaluations allowed during the optimization (default: 1e7).</p></li>
+<li><p><strong>x0_bound</strong> (<em>float</em>) – The maximum extension below the minimum and above the maximum of the center of a gaussian function used in
+fitting.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – If verbose is set to True (default), A report will be printed at the end of the fitting process.</p></li>
+<li><p><strong>baseline_degree</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Exception raised if the number of gaussians is less than one or if an invalid value is given to the baseline
+    degree.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.FittingEngine.optimized_parameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">optimized_parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#spectroscopytools.uvvis.FittingEngine.optimized_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>The list of optimized parameters minimizing the squared residuals of the composite function difference to the
+provided spectroscopic data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The list of optimized parameters.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.FittingEngine.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(16.0,</span> <span class="pre">10.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.FittingEngine.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Function to plot the results of the fitting operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – The size of the matplotlib figure to be used in plotting the spectrum. (default: (16, 10))</p></li>
+<li><p><strong>savepath</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – If set to a value different from None, will specify the path of the file to be saved.</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – If set to True (default) will show an interactive window where the plot is displayed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – Exception raised if the <cite>fit</cite> function has not been called before.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="spectroscopytools.uvvis.UVVisSpectrum">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spectroscopytools.uvvis.</span></span><span class="sig-name descname"><span class="pre">UVVisSpectrum</span></span><a class="headerlink" href="#spectroscopytools.uvvis.UVVisSpectrum" title="Permalink to this definition"></a></dt>
 <dd><p>The UVVisSpectrum class allows the manipulation of UV-Visible data originated from experimental
@@ -305,6 +417,27 @@ lower and upper limits.</p>
 <li><p><strong>savepath</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – If set to a value different from None, will specify the path of the file to be saved.</p></li>
 <li><p><strong>show</strong> (<em>bool</em>) – If set to True (default) will show an interactive window where the plot is displayed.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.unitary_gaussian">
+<span class="sig-prename descclassname"><span class="pre">spectroscopytools.uvvis.</span></span><span class="sig-name descname"><span class="pre">unitary_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.unitary_gaussian" title="Permalink to this definition"></a></dt>
+<dd><p>Unitary height Gaussian function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – The float value encoding the current value of the coordinate.</p></li>
+<li><p><strong>x0</strong> (<em>float</em>) – The float value encoding the position of the center of the Gaussian function.</p></li>
+<li><p><strong>fwhm</strong> (<em>float</em>) – The float value indicating the full width at half maximum setting the amplitude of the Gaussian function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value of the Gaussian function at the point <cite>x</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
