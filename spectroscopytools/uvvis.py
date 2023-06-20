@@ -7,6 +7,8 @@ from warnings import warn
 from scipy.interpolate import make_interp_spline, BSpline
 from scipy.optimize import curve_fit
 
+from spectroscopytools.constants import *
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -85,6 +87,32 @@ class UVVisSpectrum:
             The list of float values encoding the wavelength, in nanometers, associated with each datapoint.
         """
         return self.__wavelength
+    
+    @property
+    def electronvolt(self) -> List[float]:
+        """
+        The energy values in electronvolts (eV) associated with each datapoint.
+
+        Returns
+        -------
+        List[float]
+            The list of float values encoding the energy, in eV, associated with each datapoint.
+        """
+        energy = [J_to_eV*PLANCK_CONSTANT*SPEED_OF_LIGHT/(1e-9*wl) for wl in self.wavelength]
+        return energy
+
+    @property
+    def wavenumber(self) -> List[float]:
+        """
+        The wavenumber in cm^-1 associated with each datapoint.
+
+        Returns
+        -------
+        List[float]
+            The list of float values encoding the wavenumber, in cm^-1, associated with each datapoint.
+        """
+        wavenumber = [1/(1e-7*wl) for wl in self.wavelength]
+        return wavenumber
 
     @property
     def absorbance(self) -> List[float]:
@@ -415,6 +443,7 @@ class UVVisSpectrum:
 
 def plot_spectrum(
     spectra: Union[List[UVVisSpectrum], UVVisSpectrum],
+    xunit: str = "wavelength",
     transmittance: bool = False,
     xrange: Optional[Tuple[float, float]] = None,
     yrange: Optional[Tuple[float, float]] = None,
@@ -429,6 +458,8 @@ def plot_spectrum(
     ---------
     spectra: Union[List[UVVisSpectrum], UVVisSpectrum]
         The spectrum or the list of spectra to plot.
+    xunit: str
+        The unit to be adopted for the x-axis. Available options: "wavelength", "wavenumber", "electronvolt"
     transmittance: bool
         If set to True wil switch the y-axis to transmittance mode.
     xrange: Optional[Tuple[float, float]]
@@ -441,6 +472,11 @@ def plot_spectrum(
         If set to a value different from None, will specify the path of the file to be saved.
     show: bool
         If set to True (default) will show an interactive window where the plot is displayed.
+    
+    Raises
+    ------
+    ValueError
+        Exception raised if the selected xunit option is invalid:
     """
     plt.rc("font", **{"size": 18})
 
@@ -449,8 +485,19 @@ def plot_spectrum(
     spectra: List[UVVisSpectrum] = [spectra] if type(spectra) == UVVisSpectrum else spectra
 
     for spectrum in spectra:
+
+        xseries = None
+        if xunit == "wavelenght":
+            xseries = spectrum.wavelength
+        elif xunit == "wavenumber":
+            xseries = spectrum.wavenumber
+        elif xunit == "electronvolt":
+            xseries = spectrum.electronvolt
+        else:
+            raise ValueError(f"The xunit option `{xunit}` is invalid.")
+
         plt.plot(
-            spectrum.wavelength,
+            xseries,
             spectrum.transmittance if transmittance else spectrum.absorbance,
             label=f"{spectrum.title}",
         )
@@ -461,7 +508,13 @@ def plot_spectrum(
     if yrange is not None:
         plt.ylim(yrange)
 
-    plt.xlabel("Wavelength [nm]", size=22)
+    if xunit == "wavelenght":
+        plt.xlabel("Wavelength [nm]")
+    elif xunit == "wavenumber":
+        plt.xlabel(r"Wavenumber [$cm^{-1}$]")
+    elif xunit == "electronvolt":
+        plt.xlabel(r"Energy [eV]")
+
     plt.ylabel(r"Transmittance [$\%$]" if transmittance else "Absorbance [a.u.]", size=22)
 
     plt.grid(which="major", c="#DDDDDD")
