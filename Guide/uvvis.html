@@ -282,12 +282,12 @@ Min absorbance: 0.02068
 <p>Once a <code class="docutils literal notranslate"><span class="pre">UVVisSpectrum</span></code> object has been created, a Gaussian-based fitting can be performed using the <code class="docutils literal notranslate"><span class="pre">spectroscopytools.uvvis.FittingEngine</span></code>. The fitting routine optimizes a linear combination of gaussian functions combined with a polynobial baseline of different order. The general equation of the composite function <span class="math notranslate nohighlight">\(f(x)\)</span> is the following:</p>
 <div class="math notranslate nohighlight">
 \[
-  f(x) := \sum_{k=0}^{N_b} c^{(b)}_k x^k + \sum_{k=0}^{N_g} c^{(g)}_k e^{-\frac{(x-x_k)^2}{2\sigma^2}} \qquad \text{with} \qquad \sigma = \frac{w_\mathrm{FWHM}}{2\sqrt{2 \log(2)}}
+  f(x) := \sum_{k=0}^{N_b} c^{(b)}_k x^k + \sum_{k=0}^{N_g} c^{(g)}_k e^{-\frac{(x-x_k)^2}{2\sigma^2}} \qquad \text{with} \qquad \sigma = \frac{w_\mathrm{FWHM}}{2\sqrt{2 \ln(2)}}
 \]</div>
 <p>where <span class="math notranslate nohighlight">\(N_b\)</span> and <span class="math notranslate nohighlight">\(N_g\)</span> are set freely by the user. The optimized parameters are the expansion coefficients <span class="math notranslate nohighlight">\(c^{(b)}_k\)</span> and <span class="math notranslate nohighlight">\(c^{(b)}_k\)</span>, the position <span class="math notranslate nohighlight">\(x_k\)</span> of each gaussian and its amplitude at half the maximum <span class="math notranslate nohighlight">\(w_\mathrm{FWHM}\)</span>. A constrained minimization is performed using the <code class="docutils literal notranslate"><span class="pre">scipy.optimize.curve_fit</span></code> function setting the following limits:</p>
 <ul class="simple">
 <li><p>The coefficients <span class="math notranslate nohighlight">\(c^{(b)}_k\)</span>, <span class="math notranslate nohighlight">\(c^{(b)}_k\)</span> and the full width at half maximum <span class="math notranslate nohighlight">\(w_\mathrm{FWHM}\)</span> are limited to positive values.</p></li>
-<li><p>The center of each gaussian is limited to fall within a finite maximum excursion from the wavelength range included in the spectrum. This can be set by the user (by default <span class="math notranslate nohighlight">\(100\mathrm{nm}\)</span> from each end of the spectrum is adopted).</p></li>
+<li><p>The center <span class="math notranslate nohighlight">\(x_k\)</span> of each gaussian is limited to fall within a finite maximum excursion from the wavelength range included in the spectrum. This can be set by the user (by default <span class="math notranslate nohighlight">\(100\mathrm{nm}\)</span> from each end of the spectrum is adopted).</p></li>
 </ul>
 <p>To perform a gaussian fitting using 13 Gaussian function and a zero-order baseline (constant shift), the following code can be used:</p>
 <div class="cell docutils container">
