@@ -12,8 +12,10 @@ import matplotlib.pyplot as plt
 
 
 def unitary_gaussian(x: float, x0: float, fwhm: float) -> float:
-    """
-    Unitary height Gaussian function.
+    r"""
+    Unitary height Gaussian function :math:`G(x)`.
+
+    .. math:: G(x):= e^{-\frac{(x-x_0)^2}{2\sigma^2}} \qquad \mathrm{where} \qquad \sigma = \frac{w_\mathrm{FWHM}}{2\sqrt{2\ln(2)}}
 
     Arguments
     ---------
@@ -138,8 +140,8 @@ class UVVisSpectrum:
         path: str
             The path to the ASCII file encoding the experimental measurements.
 
-        Raises:
-        -------
+        Raises
+        ------
         RuntimeError
             Exception raised if the file does not exist or if it cannot be properly parsed.
         """
