@@ -284,6 +284,26 @@ of classmethods designed to parse specific file formats.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.UVVisSpectrum.peak_search">
+<span class="sig-name descname"><span class="pre">peak_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prominence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.UVVisSpectrum.peak_search" title="Permalink to this definition"></a></dt>
+<dd><p>Function running the <cite>scipy.signal.find_peaks</cite> funciton to detect peaks in the spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prominence</strong> (<em>float</em>) – The prominence threshold to be used in the peak search (default: 0.01). The prominence of a peak measures
+how much a peak stands out from the surrounding baseline of the signal and is defined as the vertical
+distance between the peak and its lowest contour line.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The dictionary containing the index of the peak as the key and the tuple containing the wavelength and
+absorbance as the value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[int, Tuple[float, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="spectroscopytools.uvvis.UVVisSpectrum.pitch">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pitch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spectroscopytools.uvvis.UVVisSpectrum.pitch" title="Permalink to this definition"></a></dt>
@@ -432,7 +452,7 @@ lower and upper limits.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="spectroscopytools.uvvis.plot_spectrum">
-<span class="sig-prename descclassname"><span class="pre">spectroscopytools.uvvis.</span></span><span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xunit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wavelength'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmittance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12.0,</span> <span class="pre">8.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.plot_spectrum" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">spectroscopytools.uvvis.</span></span><span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xunit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wavelength'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmittance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12.0,</span> <span class="pre">8.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_prominence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.plot_spectrum" title="Permalink to this definition"></a></dt>
 <dd><p>Function capable of plotting one or more spectra.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -444,6 +464,8 @@ lower and upper limits.</p>
 <li><p><strong>yrange</strong> (<em>Optional</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>]</em>) – The range of values to be shown on the y-axis. The meaning of the values depends on the display mode selected.</p></li>
 <li><p><strong>figsize</strong> (<em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – The size of the matplotlib figure to be used in plotting the spectrum. (default: (12, 8))</p></li>
 <li><p><strong>savepath</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – If set to a value different from None, will specify the path of the file to be saved.</p></li>
+<li><p><strong>peak_prominence</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – If set to a value different from None, will run a peak_search on the spectrum with the user provided prominence
+and will reder a marker on the spectrum.</p></li>
 <li><p><strong>show</strong> (<em>bool</em>) – If set to True (default) will show an interactive window where the plot is displayed.</p></li>
 </ul>
 </dd>
