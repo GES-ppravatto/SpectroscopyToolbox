@@ -140,7 +140,29 @@ Min absorbance: 0.00953
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/0f806995e22dfe77206f22cbc57b424099f3a74619e87329df796e9e7d53b1e2.png" src="../_images/0f806995e22dfe77206f22cbc57b424099f3a74619e87329df796e9e7d53b1e2.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">3</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">spectroscopytools.uvvis</span> <span class="kn">import</span> <span class="n">plot_spectrum</span>
+<span class="ne">----&gt; </span><span class="mi">3</span> <span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">xrange</span><span class="o">=</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">700</span><span class="p">))</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.8.17/x64/lib/python3.8/site-packages/spectroscopytools/uvvis.py:497,</span> in <span class="ni">plot_spectrum</span><span class="nt">(spectra, xunit, transmittance, xrange, yrange, figsize, savepath, show)</span>
+<span class="g g-Whitespace">    </span><span class="mi">495</span>         <span class="n">xseries</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">electronvolt</span>
+<span class="g g-Whitespace">    </span><span class="mi">496</span>     <span class="k">else</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">497</span>         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The xunit option `</span><span class="si">{</span><span class="n">xunit</span><span class="si">}</span><span class="s2">` is invalid.&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">499</span>     <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">500</span>         <span class="n">xseries</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">501</span>         <span class="n">spectrum</span><span class="o">.</span><span class="n">transmittance</span> <span class="k">if</span> <span class="n">transmittance</span> <span class="k">else</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">absorbance</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">502</span>         <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spectrum</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">503</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">505</span> <span class="k">if</span> <span class="n">xrange</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+<span class="ne">ValueError</span>: The xunit option `wavelength` is invalid.
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;Figure size 1000x600 with 0 Axes&gt;
+</pre></div>
+</div>
 </div>
 </div>
 <section id="performing-operations-between-spectra">
@@ -159,9 +181,6 @@ Min absorbance: 0.00953
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/88e662bfccf52a65f356ac52140ec5e28f580231f563b50d3c538162b615b366.png" src="../_images/88e662bfccf52a65f356ac52140ec5e28f580231f563b50d3c538162b615b366.png" />
-</div>
 </div>
 <p>Operations between different spectra can be performed by simply using the algebraic symbols (<code class="docutils literal notranslate"><span class="pre">+</span></code>, <code class="docutils literal notranslate"><span class="pre">-</span></code>, <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">/</span></code>). As an example, the following code will compute the ratio between two spectra:</p>
 <div class="cell docutils container">
@@ -174,9 +193,6 @@ Min absorbance: 0.00953
 <span class="n">plot_spectrum</span><span class="p">([</span><span class="n">sp1</span><span class="p">,</span> <span class="n">sp2</span><span class="p">,</span> <span class="n">sp_diff</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">xrange</span><span class="o">=</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">700</span><span class="p">),</span> <span class="n">yrange</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/b178da803eb3fd0961f0b94e4b48c90e2dd453817db21a0bec268477fa3e3ec5.png" src="../_images/b178da803eb3fd0961f0b94e4b48c90e2dd453817db21a0bec268477fa3e3ec5.png" />
 </div>
 </div>
 <p>Please notice how, in both case, the title of the spectrum is automatically updated to keep track of the operation performed. The timestamp is kept unchanged in the case of a simple scaling operation while is set to <code class="docutils literal notranslate"><span class="pre">None</span></code> if a binary operation is considered.</p>
@@ -196,27 +212,6 @@ Min absorbance: 0.00953
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original spectrum:
-UV-Visible: I2_water
------------------------------------------------------------------
-Date: 2023-06-14 15:14:38
-Instrument: JASCO Corp., V-550, Rev. 1.00
-Wavelength: 700.0 - 300.0 nm
-Max absorbance: 0.21184
-Min absorbance: 0.00953
-
-New spectrum:
-UV-Visible: I2_water
------------------------------------------------------------------
-Date: 2023-06-14 15:14:38
-Instrument: JASCO Corp., V-550, Rev. 1.00
-Wavelength: 600.0 - 350.0 nm
-Max absorbance: 0.21184
-Min absorbance: 0.02068
-</pre></div>
-</div>
-</div>
 </div>
 </section>
 <section id="interpolating-a-spectrum">
@@ -227,11 +222,6 @@ Min absorbance: 0.02068
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bspline</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">interpolate</span><span class="p">()</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The extimated value of absorbance at 513.4nm is </span><span class="si">{</span><span class="n">bspline</span><span class="p">(</span><span class="mf">513.4</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The extimated value of absorbance at 513.4nm is 0.1170
 </pre></div>
 </div>
 </div>
@@ -262,18 +252,6 @@ Min absorbance: 0.02068
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>UV-Visible: I2_water (resampled)
------------------------------------------------------------------
-Date: 2023-06-14 15:14:38
-Instrument: B-spline (k=3) interpolation &lt;- original: JASCO Corp., V-550, Rev. 1.00
-Wavelength: 600 - 350 nm
-Max absorbance: 0.21191024427059665
-Min absorbance: 0.02068
-</pre></div>
-</div>
-<img alt="../_images/2f5cd6f719c9995ec776ade891c30fcf36d016f5cfd3921fc531a907c825b040.png" src="../_images/2f5cd6f719c9995ec776ade891c30fcf36d016f5cfd3921fc531a907c825b040.png" />
-</div>
 </div>
 </section>
 </section>
@@ -300,41 +278,6 @@ Min absorbance: 0.02068
 <span class="n">engine</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>============================================================================
-                            FITTING REPORT
-============================================================================
-Output message: `ftol` termination condition is satisfied.
-
-Polynomial baseline:
-  -----------------------
-  | order | coefficient |
-  -----------------------
-  | 0     | 6.4352e-02  |
-  -----------------------
-
-Gaussian functions:
-  ---------------------------------------------------
-  | index | coefficient | center (nm) |  FWHM (nm)  |
-  ---------------------------------------------------
-  | 0     | 3.7619e+00  |   214.57    | 3.1840e+01  |
-  | 1     | 3.9269e+00  |   293.81    | 4.8508e+01  |
-  | 2     | 1.9092e+00  |   243.91    | 2.3272e+01  |
-  | 3     | 5.1091e-01  |   357.65    | 4.3361e+01  |
-  | 4     | 8.5413e-33  |   439.29    | 1.4810e+01  |
-  | 5     | 1.2326e-02  |   490.71    | 2.9233e+01  |
-  | 6     | 3.1693e-02  |   517.98    | 4.4595e+01  |
-  | 7     | 8.9588e-02  |   576.73    | 7.4028e+01  |
-  | 8     | 5.2161e-03  |   616.00    | 2.8209e+01  |
-  | 9     | 1.3025e-01  |   691.22    | 8.9603e+01  |
-  | 10    | 6.3496e-01  |   749.21    | 6.4581e+01  |
-  | 11    | 4.7207e-02  |   793.04    | 7.1698e+01  |
-  | 12    | 4.9939e-02  |   958.05    | 9.1561e+01  |
-  ---------------------------------------------------
-</pre></div>
-</div>
-<img alt="../_images/b48809c8d778d29826be81bed2573e65602b7fe87b2d777f5868dd5b4f83c94b.png" src="../_images/b48809c8d778d29826be81bed2573e65602b7fe87b2d777f5868dd5b4f83c94b.png" />
 </div>
 </div>
 </section>

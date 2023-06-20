@@ -236,6 +236,20 @@ of classmethods designed to parse specific file formats.</p>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.UVVisSpectrum.electronvolt">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">electronvolt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#spectroscopytools.uvvis.UVVisSpectrum.electronvolt" title="Permalink to this definition"></a></dt>
+<dd><p>The energy values in electronvolts (eV) associated with each datapoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The list of float values encoding the energy, in eV, associated with each datapoint.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="spectroscopytools.uvvis.UVVisSpectrum.from_JASCO_ASCII">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_JASCO_ASCII</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.UVVisSpectrum.from_JASCO_ASCII" title="Permalink to this definition"></a></dt>
@@ -400,16 +414,31 @@ lower and upper limits.</p>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="spectroscopytools.uvvis.UVVisSpectrum.wavenumber">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wavenumber</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#spectroscopytools.uvvis.UVVisSpectrum.wavenumber" title="Permalink to this definition"></a></dt>
+<dd><p>The wavenumber in cm^-1 associated with each datapoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The list of float values encoding the wavenumber, in cm^-1, associated with each datapoint.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="spectroscopytools.uvvis.plot_spectrum">
-<span class="sig-prename descclassname"><span class="pre">spectroscopytools.uvvis.</span></span><span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmittance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12.0,</span> <span class="pre">8.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.plot_spectrum" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">spectroscopytools.uvvis.</span></span><span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xunit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wavelength'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmittance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12.0,</span> <span class="pre">8.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectroscopytools.uvvis.plot_spectrum" title="Permalink to this definition"></a></dt>
 <dd><p>Function capable of plotting one or more spectra.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>spectra</strong> (<em>Union</em><em>[</em><em>List</em><em>[</em><a class="reference internal" href="#spectroscopytools.uvvis.UVVisSpectrum" title="spectroscopytools.uvvis.UVVisSpectrum"><em>UVVisSpectrum</em></a><em>]</em><em>, </em><a class="reference internal" href="#spectroscopytools.uvvis.UVVisSpectrum" title="spectroscopytools.uvvis.UVVisSpectrum"><em>UVVisSpectrum</em></a><em>]</em>) – The spectrum or the list of spectra to plot.</p></li>
+<li><p><strong>xunit</strong> (<em>str</em>) – The unit to be adopted for the x-axis. Available options: “wavelength”, “wavenumber”, “electronvolt”</p></li>
 <li><p><strong>transmittance</strong> (<em>bool</em>) – If set to True wil switch the y-axis to transmittance mode.</p></li>
 <li><p><strong>xrange</strong> (<em>Optional</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>]</em>) – The range of values to be shown on the x-axis. The meaning of the values depends on the display mode selected.</p></li>
 <li><p><strong>yrange</strong> (<em>Optional</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>]</em>) – The range of values to be shown on the y-axis. The meaning of the values depends on the display mode selected.</p></li>
@@ -417,6 +446,9 @@ lower and upper limits.</p>
 <li><p><strong>savepath</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – If set to a value different from None, will specify the path of the file to be saved.</p></li>
 <li><p><strong>show</strong> (<em>bool</em>) – If set to True (default) will show an interactive window where the plot is displayed.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Exception raised if the selected xunit option is invalid:</p>
 </dd>
 </dl>
 </dd></dl>
