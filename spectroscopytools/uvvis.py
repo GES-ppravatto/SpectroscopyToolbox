@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from os.path import isfile
-from typing import Tuple, List, Optional, Union, Callable
+from typing import Tuple, List, Optional, Union, Dict
 from datetime import datetime
 from warnings import warn
 from scipy.interpolate import make_interp_spline, BSpline
 from scipy.optimize import curve_fit
+from scipy.signal import find_peaks
 
 from spectroscopytools.constants import *
 
@@ -87,7 +88,7 @@ class UVVisSpectrum:
             The list of float values encoding the wavelength, in nanometers, associated with each datapoint.
         """
         return self.__wavelength
-    
+
     @property
     def electronvolt(self) -> List[float]:
         """
@@ -98,7 +99,7 @@ class UVVisSpectrum:
         List[float]
             The list of float values encoding the energy, in eV, associated with each datapoint.
         """
-        energy = [J_to_eV*PLANCK_CONSTANT*SPEED_OF_LIGHT/(1e-9*wl) for wl in self.wavelength]
+        energy = [J_to_eV * PLANCK_CONSTANT * SPEED_OF_LIGHT / (1e-9 * wl) for wl in self.wavelength]
         return energy
 
     @property
@@ -111,7 +112,7 @@ class UVVisSpectrum:
         List[float]
             The list of float values encoding the wavenumber, in cm^-1, associated with each datapoint.
         """
-        wavenumber = [1/(1e-7*wl) for wl in self.wavelength]
+        wavenumber = [1 / (1e-7 * wl) for wl in self.wavelength]
         return wavenumber
 
     @property
@@ -440,6 +441,31 @@ class UVVisSpectrum:
 
         return spectrum
 
+    def peak_search(self, prominence: float = 0.01) -> Dict[int, Tuple[float, float]]:
+        """
+        Function running the `scipy.signal.find_peaks` funciton to detect peaks in the spectrum.
+
+        Arguments
+        ---------
+        prominence: float
+            The prominence threshold to be used in the peak search (default: 0.01). The prominence of a peak measures
+            how much a peak stands out from the surrounding baseline of the signal and is defined as the vertical
+            distance between the peak and its lowest contour line.
+
+        Returns
+        -------
+        Dict[int, Tuple[float, float]]
+            The dictionary containing the index of the peak as the key and the tuple containing the wavelength and
+            absorbance as the value.
+        """
+        idx_list = find_peaks(self.__absorbance, prominence=prominence)[0]
+
+        peak_dict = {}
+        for idx in idx_list:
+            peak_dict[idx] = (self.__wavelength[idx], self.__absorbance[idx])
+
+        return peak_dict
+
 
 def plot_spectrum(
     spectra: Union[List[UVVisSpectrum], UVVisSpectrum],
@@ -449,6 +475,7 @@ def plot_spectrum(
     yrange: Optional[Tuple[float, float]] = None,
     figsize: Tuple[float, float] = (12.0, 8.0),
     savepath: Optional[str] = None,
+    peak_prominence: Optional[float] = None,
     show: bool = True,
 ):
     """
@@ -470,9 +497,12 @@ def plot_spectrum(
         The size of the matplotlib figure to be used in plotting the spectrum. (default: (12, 8))
     savepath: Optional[str]
         If set to a value different from None, will specify the path of the file to be saved.
+    peak_prominence: Optional[float]
+        If set to a value different from None, will run a peak_search on the spectrum with the user provided prominence
+        and will reder a marker on the spectrum.
     show: bool
         If set to True (default) will show an interactive window where the plot is displayed.
-    
+
     Raises
     ------
     ValueError
@@ -485,9 +515,8 @@ def plot_spectrum(
     spectra: List[UVVisSpectrum] = [spectra] if type(spectra) == UVVisSpectrum else spectra
 
     for spectrum in spectra:
-
         xseries = None
-        if xunit == "wavelenght":
+        if xunit == "wavelength":
             xseries = spectrum.wavelength
         elif xunit == "wavenumber":
             xseries = spectrum.wavenumber
@@ -496,11 +525,28 @@ def plot_spectrum(
         else:
             raise ValueError(f"The xunit option `{xunit}` is invalid.")
 
-        plt.plot(
+        line = plt.plot(
             xseries,
             spectrum.transmittance if transmittance else spectrum.absorbance,
             label=f"{spectrum.title}",
         )
+
+        if peak_prominence is not None:
+            color = line[-1].get_color()
+            peak_report = spectrum.peak_search(prominence=peak_prominence)
+
+            for key, (x, y) in peak_report.items():
+                plt.scatter(x, y + 0.08, c=color, marker="v", s=90)
+                plt.text(
+                    x,
+                    y + 0.18,
+                    s=f"{x:.1f}",
+                    rotation=90,
+                    horizontalalignment="center",
+                    verticalalignment="bottom",
+                    size=16,
+                    c=color,
+                )
 
     if xrange is not None:
         plt.xlim(xrange)
@@ -508,12 +554,12 @@ def plot_spectrum(
     if yrange is not None:
         plt.ylim(yrange)
 
-    if xunit == "wavelenght":
-        plt.xlabel("Wavelength [nm]")
+    if xunit == "wavelength":
+        plt.xlabel("Wavelength [nm]", size=22)
     elif xunit == "wavenumber":
-        plt.xlabel(r"Wavenumber [$cm^{-1}$]")
+        plt.xlabel(r"Wavenumber [$cm^{-1}$]", size=22)
     elif xunit == "electronvolt":
-        plt.xlabel(r"Energy [eV]")
+        plt.xlabel(r"Energy [eV]", size=22)
 
     plt.ylabel(r"Transmittance [$\%$]" if transmittance else "Absorbance [a.u.]", size=22)
 
@@ -548,8 +594,8 @@ class FittingEngine:
         self.__spectrum: UVVisSpectrum = spectrum
         self.__popt: List[float] = []
         self.__pcov: List[List[float]] = []
-        self.__infodict: dict = None,
-        self.__mesg: str = None,
+        self.__infodict: dict = (None,)
+        self.__mesg: str = (None,)
         self.__ier: int = None
 
     def __str__(self) -> str:
@@ -559,9 +605,9 @@ class FittingEngine:
             msg += "============================================================================\n"
             msg += "                            FITTING REPORT\n"
             msg += "============================================================================\n"
-            msg += "Output message: " + self.__mesg + "\n\n"  
-        
-        if self.__baseline_degree is not None:           
+            msg += "Output message: " + self.__mesg + "\n\n"
+
+        if self.__baseline_degree is not None:
             msg += "Polynomial baseline:\n"
             msg += "  -----------------------\n"
             msg += "  | order | coefficient |\n"

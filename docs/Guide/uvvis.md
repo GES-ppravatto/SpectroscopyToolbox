@@ -112,6 +112,28 @@ plt.grid(which="minor", c="#EEEEEE")
 plt.show()
 ```
 
+## Finding peaks in a spectrum
+The `UVVisSpectrum` class provides the built-in `peak_search` method to detect peaks in the spectrum. The function is based around the `scipy.signal.find_peaks` function and operates following a user-defined prominence level. To run a peak search the following command can be used:
+
+```{code-cell} python
+spectrum = UVVisSpectrum.from_JASCO_ASCII("../utils/fit_example.txt")
+peaks = spectrum.peak_search()
+print(peaks)
+```
+
+The peaks locaded are returned as a dictionary of tuples encoding wavelength and absorbance associated to an integer key labelling the peak order. The peak finding procedure is also directly implemented in the `plot_spectrum` and can be activated by setting the `peak_prominence` keyword to a float value (we suggest 0.01 absorbance units as a good starting value for UV-Visible spectra). As an example consider the following example:
+
+```{code-cell} python
+spectrum = UVVisSpectrum.from_JASCO_ASCII("../utils/fit_example.txt")
+plot_spectrum(spectrum, peak_prominence=0.01, xrange=(190, 900), yrange=(-0.1, 4.6))
+```
+
+:::{admonition} Tip
+:class: info
+Axes are not automatically rescaled to fit the peak labels, so you will probably have to manually set the y axis range as shown above with the `yrange` parameter.
+:::
+
+
 # Perfrming a Gaussian fitting
 
 Once a `UVVisSpectrum` object has been created, a Gaussian-based fitting can be performed using the `spectroscopytools.uvvis.FittingEngine`. The fitting routine optimizes a linear combination of gaussian functions combined with a polynobial baseline of different order. The general equation of the composite function $f(x)$ is the following:
