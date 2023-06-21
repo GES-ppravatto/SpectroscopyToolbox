@@ -1,6 +1,6 @@
 # Spectroscopy-Toolbox User Guide
 
-Version: [`0.0.1`](changelog)
+Version: [`0.0.2-alpha`](changelog)
 
 This is the user guide for the `Spectroscopy-Toolbox` Python library. This software package is designed to provide a simple interface for the manipulation, plotting and analysis of spectroscopic data.
 

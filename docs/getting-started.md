@@ -11,21 +11,25 @@ kernelspec:
 ---
 
 (getting-started)=
+# Getting started
 
-# Getting Started
+The last release of the `spectroscopytools` package can be installed directly from `pip` using the command:
+```
+pip install spectroscopy-toolbox
+```
 
-The `spectroscopytools` package can be installed by first downloading the repository from our [GitHub](https://github.com/GES-ppravatto/SpectroscopyToolbox) page and then installing via `pip`. 
-
-:::{admonition} Note
-:class: warning
-We always recommend installing new Python packages in a clean Conda environment and avoid installing in the system Python distribution or in the base Conda environment! If you are unfamiliar with Conda, please refer to their [documentation](https://docs.anaconda.com/free/anaconda/install/index.html) for a guide on how to set up environments.
-:::
+The latest unreleased version can instead be downloaded directly from our [GitHub](https://github.com/GES-ppravatto/SpectroscopyToolbox) page and then installed using `pip`. 
 
 ```
 git clone https://github.com/GES-ppravatto/SpectroscopyToolbox.git
 cd SpectroscopyToolbox
 pip install .
 ```
+
+:::{admonition} Note
+:class: warning
+We always recommend installing new Python packages in a clean Conda environment and avoid installing in the system Python distribution or in the base Conda environment! If you are unfamiliar with Conda, please refer to their [documentation](https://docs.anaconda.com/free/anaconda/install/index.html) for a guide on how to set up environments.
+:::
 
 The library can be imported in a Python script via the following syntax:
 

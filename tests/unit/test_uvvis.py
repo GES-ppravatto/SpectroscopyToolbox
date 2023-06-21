@@ -4,7 +4,8 @@ from copy import deepcopy
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 from scipy.interpolate import BSpline
 
-from spectroscopytools.uvvis import UVVisSpectrum
+from spectroscopytools.constants import *
+from spectroscopytools.uvvis import unitary_gaussian, UVVisSpectrum
 
 # Get the path of the tests directory
 TEST_DIR = dirname(abspath(__file__))
@@ -35,6 +36,14 @@ JASCO_EXPECTED = [
 ]
 
 
+# Test the unitary_gaussian function
+def test_unitary_gaussian():
+    assert_almost_equal(unitary_gaussian(0, 0, 1), 1., decimal=6)
+    assert_almost_equal(unitary_gaussian(0.5, 0, 1), 0.5, decimal=6)
+    assert_almost_equal(unitary_gaussian(0, 0.5, 1), 0.5, decimal=6)
+    assert_almost_equal(unitary_gaussian(0, -0.5, 1), 0.5, decimal=6)
+
+
 # Test the UVVisSpectrum class constructor
 def test_UVVisSpectrum___init__():
     try:
@@ -54,6 +63,19 @@ def test_UVVisSpectrum_from_JASCO_ASCII():
     assert obj.instrument == "JASCO Corp., V-550, Rev. 1.00"
     assert len(obj) == 21
     assert obj.timestamp == datetime(2023, 6, 14, 15, 14, 38)
+
+# Test the UVVisSpectrum __str__ method
+def test_UVVisSpectrum___str__():
+
+    obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
+    assert str(obj) == """UV-Visible: I2_water
+-----------------------------------------------------------------
+Date: 2023-06-14 15:14:38
+Instrument: JASCO Corp., V-550, Rev. 1.00
+Wavelength: 700.0 - 300.0 nm
+Max absorbance: 0.2118
+Min absorbance: 0.0095
+"""
 
 
 # Test the UVVisSpectrum __iter__ method
@@ -198,6 +220,21 @@ def test_UVVisSpectrum_resample_errors():
         assert False, "Exception not raised when pitch is invalid"
 
 
+# Test the UVVisSpectrum peak_search method
+def test_UVVisSpectrum_peak_search():
+
+    obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
+    
+    try:
+        data = obj.peak_search()
+    except:
+        assert False, "Exception raised on peak_search function call"
+
+    assert len(data) == 1
+    assert_almost_equal(data[0][0], 460.0, decimal=4)
+    assert_almost_equal(data[0][1], 0.21183, decimal=4)
+
+
 # Test the UVVisSpectrum properties
 def test_UVVisSpectrum_properties():
     obj = UVVisSpectrum.from_JASCO_ASCII(f"{TEST_DIR}/utils/JASCO_ASCII_example.txt")
@@ -205,5 +242,11 @@ def test_UVVisSpectrum_properties():
     assert obj.pitch == 20.0
 
     assert_array_almost_equal([d[0] for d in JASCO_EXPECTED], obj.wavelength, decimal=4)
+    assert_array_almost_equal([1 / (1e-7 * d[0]) for d in JASCO_EXPECTED], obj.wavenumber, decimal=4)
+    assert_array_almost_equal(
+        [J_to_eV * PLANCK_CONSTANT * SPEED_OF_LIGHT / (1e-9 * d[0]) for d in JASCO_EXPECTED],
+        obj.electronvolt,
+        decimal=4,
+    )
     assert_array_almost_equal([d[1] for d in JASCO_EXPECTED], obj.absorbance, decimal=4)
     assert_array_almost_equal([10 ** (2 - d[1]) for d in JASCO_EXPECTED], obj.transmittance, decimal=4)

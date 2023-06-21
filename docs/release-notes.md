@@ -1,6 +1,17 @@
 (changelog)=
 # Release notes
 
+## Version `0.0.2-alpha`
+
+* Added new features to the `UVVisSpectrum` class:
+  * Added `wavenumber` and `electrovolt` properties to rescale plots according to wavenumber and energies.
+  * Added `peak_search` function.
+* Added new options to the `plot_spectrum` function:
+  * Added option to select different units for the x-axis.
+  * Added option to integrate peak search labels.
+* Early implementation of the `FittingEngine` class to perform gaussian fitting with baseline of a `UVVisSpectrum` object.
+* Update to documentation and tests (to be improved in the beta version).
+
 ## Version `0.0.1`
 
 * Early implementation of the `uvvis` submodule:

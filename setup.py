@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="spectroscopy-toolbox",
-    version="0.0.1",
+    version="0.0.2-alpha",
     description="A small collection of python-based tools useful in the analysis of experimental spectroscopic data",
     long_description="A small collection of python-based tools useful in the analysis of experimental spectroscopic data",
     packages=["spectroscopytools"],

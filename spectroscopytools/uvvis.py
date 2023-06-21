@@ -57,9 +57,9 @@ class UVVisSpectrum:
         msg += "-----------------------------------------------------------------\n"
         msg += f"Date: {self.__timestamp}\n"
         msg += f"Instrument: {self.instrument}\n"
-        msg += f"Wavelength: {max(self.__wavelength)} - {min(self.__wavelength)} nm\n"
-        msg += f"Max absorbance: {max(self.__absorbance)}\n"
-        msg += f"Min absorbance: {min(self.__absorbance)}\n"
+        msg += f"Wavelength: {max(self.__wavelength):.1f} - {min(self.__wavelength):.1f} nm\n"
+        msg += f"Max absorbance: {max(self.__absorbance):.4f}\n"
+        msg += f"Min absorbance: {min(self.__absorbance):.4f}\n"
         return msg
 
     def __repr__(self) -> str:
@@ -461,8 +461,8 @@ class UVVisSpectrum:
         idx_list = find_peaks(self.__absorbance, prominence=prominence)[0]
 
         peak_dict = {}
-        for idx in idx_list:
-            peak_dict[idx] = (self.__wavelength[idx], self.__absorbance[idx])
+        for i, idx in enumerate(idx_list):
+            peak_dict[i] = (self.__wavelength[idx], self.__absorbance[idx])
 
         return peak_dict
 
