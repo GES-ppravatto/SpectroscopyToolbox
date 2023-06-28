@@ -839,7 +839,7 @@ class FittingEngine:
             ax1.fill_between(wl, [0 for _ in wl], gaussian, alpha=0.5, label=str(n))
 
         fit = [self.combined_function(x, *p) for x in wl]
-        error = [100 * (x - y) / x for x, y in zip(self.__spectrum.absorbance, fit)]
+        error = [x - y for x, y in zip(self.__spectrum.absorbance, fit)]
 
         ax1.plot(
             wl,
@@ -858,7 +858,7 @@ class FittingEngine:
         ax2.set_xlabel("Wavelength [nm]", size=22)
 
         ax1.set_ylabel("Absorbance [a.u.]", size=22)
-        ax2.set_ylabel("Error [%]", size=22)
+        ax2.set_ylabel("Error [a.u.]", size=22)
 
         ax1.legend()
 
